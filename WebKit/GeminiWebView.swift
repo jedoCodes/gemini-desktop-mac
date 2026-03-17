@@ -125,6 +125,9 @@ struct GeminiWebView: NSViewRepresentable {
             panel.allowsMultipleSelection = parameters.allowsMultipleSelection
             panel.canChooseDirectories = parameters.allowsDirectories
             panel.canChooseFiles = true
+            // Activate the app so the file dialog receives focus,
+            // especially when triggered from the non-activating floating panel
+            NSApp.activate(ignoringOtherApps: true)
             panel.begin { response in
                 completionHandler(response == .OK ? panel.urls : nil)
             }

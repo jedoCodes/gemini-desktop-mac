@@ -9,6 +9,8 @@ struct SettingsView: View {
     @AppStorage(UserDefaultsKeys.hideWindowAtLaunch.rawValue) private var hideWindowAtLaunch: Bool = false
     @AppStorage(UserDefaultsKeys.hideDockIcon.rawValue) private var hideDockIcon: Bool = false
     @AppStorage(UserDefaultsKeys.appTheme.rawValue) private var appTheme: String = AppTheme.system.rawValue
+    @AppStorage(UserDefaultsKeys.userAgentOption.rawValue) private var userAgentOption: String = UserAgentOption.safari.rawValue
+    @AppStorage(UserDefaultsKeys.customUserAgent.rawValue) private var customUserAgent: String = ""
 
     @State private var showingResetAlert = false
     @State private var isClearing = false
@@ -63,6 +65,33 @@ struct SettingsView: View {
                         .labelsHidden()
                 }
             }
+            Section("User Agent") {
+                HStack {
+                    Text("Browser Identity:")
+                    Spacer()
+                    Picker("", selection: $userAgentOption) {
+                        ForEach(UserAgentOption.allCases, id: \.rawValue) { option in
+                            Text(option.displayName).tag(option.rawValue)
+                        }
+                    }
+                    .labelsHidden()
+                    .pickerStyle(.segmented)
+                    .frame(width: 240)
+                    .onChange(of: userAgentOption) { _, _ in
+                        coordinator.webViewModel.applyUserAgent()
+                    }
+                }
+                if userAgentOption == UserAgentOption.custom.rawValue {
+                    TextField("Custom User Agent", text: $customUserAgent, prompt: Text("Enter custom user agent string"))
+                        .textFieldStyle(.roundedBorder)
+                        .onSubmit {
+                            coordinator.webViewModel.applyUserAgent()
+                        }
+                }
+                Text(currentUserAgentDescription)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
             Section("Privacy") {
                 HStack {
                     VStack(alignment: .leading) {
@@ -84,6 +113,11 @@ struct SettingsView: View {
         } message: {
             Text("This will clear all cookies, cache, and login sessions. You will need to sign in to Gemini again.")
         }
+    }
+
+    private var currentUserAgentDescription: String {
+        let option = UserAgentOption(rawValue: userAgentOption) ?? .safari
+        return option.settingsDescription(custom: customUserAgent)
     }
 
     private func clearWebsiteData() {

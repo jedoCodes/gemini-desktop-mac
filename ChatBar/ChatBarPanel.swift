@@ -34,6 +34,7 @@ class ChatBarPanel: NSPanel, NSWindowDelegate {
 
     private var isExpanded = false
     private var pollingTimer: Timer?
+    private var positionSaveWork: DispatchWorkItem?
     private weak var webView: WKWebView?
 
     // Returns true if in a conversation (not on start page)
@@ -106,7 +107,7 @@ class ChatBarPanel: NSPanel, NSWindowDelegate {
         isFloatingPanel = true
         level = .floating
         isMovable = true
-        isMovableByWindowBackground = true
+        isMovableByWindowBackground = false
 
         collectionBehavior.insert(.fullScreenAuxiliary)
         collectionBehavior.insert(.canJoinAllSpaces)
@@ -241,6 +242,7 @@ class ChatBarPanel: NSPanel, NSWindowDelegate {
 
     deinit {
         pollingTimer?.invalidate()
+        positionSaveWork?.cancel()
         if let monitor = clickOutsideMonitor {
             NSEvent.removeMonitor(monitor)
         }
@@ -254,6 +256,18 @@ class ChatBarPanel: NSPanel, NSWindowDelegate {
 
         UserDefaults.standard.set(frame.width, forKey: UserDefaultsKeys.panelWidth.rawValue)
         UserDefaults.standard.set(frame.height, forKey: UserDefaultsKeys.panelHeight.rawValue)
+    }
+
+    func windowDidMove(_ notification: Notification) {
+        guard PanelPosition.current == .rememberLast else { return }
+        positionSaveWork?.cancel()
+        let origin = frame.origin
+        let work = DispatchWorkItem {
+            UserDefaults.standard.set(origin.x, forKey: UserDefaultsKeys.panelX.rawValue)
+            UserDefaults.standard.set(origin.y, forKey: UserDefaultsKeys.panelY.rawValue)
+        }
+        positionSaveWork = work
+        DispatchQueue.main.asyncAfter(deadline: .now() + Constants.positionSaveDebounce, execute: work)
     }
 
     // MARK: - Keyboard Handling
@@ -323,6 +337,6 @@ extension ChatBarPanel {
         static let initialPollingDelay: TimeInterval = 3.0
         static let webViewSearchDelay: TimeInterval = 0.5
         static let topPadding: CGFloat = 20 // Padding from the top of the screen
-
+        static let positionSaveDebounce: TimeInterval = 0.3
     }
 }

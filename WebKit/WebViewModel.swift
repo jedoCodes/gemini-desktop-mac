@@ -38,12 +38,14 @@ class WebViewModel {
     private(set) var canGoBack: Bool = false
     private(set) var canGoForward: Bool = false
     private(set) var isAtHome: Bool = true
+    private(set) var isLoading: Bool = true
 
     // MARK: - Private Properties
 
     private var backObserver: NSKeyValueObservation?
     private var forwardObserver: NSKeyValueObservation?
     private var urlObserver: NSKeyValueObservation?
+    private var loadingObserver: NSKeyValueObservation?
     private let consoleLogHandler = ConsoleLogHandler()
 
     // MARK: - Initialization
@@ -165,6 +167,12 @@ class WebViewModel {
             DispatchQueue.main.async {
                 guard let self = self else { return }
                 self.canGoForward = webView.canGoForward
+            }
+        }
+
+        loadingObserver = wkWebView.observe(\.isLoading, options: [.new, .initial]) { [weak self] webView, _ in
+            DispatchQueue.main.async {
+                self?.isLoading = webView.isLoading
             }
         }
 

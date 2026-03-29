@@ -13,7 +13,16 @@ struct MainWindowView: View {
     @Environment(\.openWindow) private var openWindow
 
     var body: some View {
-        GeminiWebView(webView: coordinator.webViewModel.wkWebView)
+        ZStack {
+            GeminiWebView(webView: coordinator.webViewModel.wkWebView)
+
+            if coordinator.webViewModel.isLoading {
+                ProgressView()
+                    .controlSize(.large)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(.background)
+            }
+        }
             .onAppear {
                 coordinator.openWindowAction = { id in
                     openWindow(id: id)

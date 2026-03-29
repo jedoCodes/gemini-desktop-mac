@@ -66,8 +66,8 @@ enum UserAgentOption: String, CaseIterable {
         }
     }
 
-    static let safariUA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15"
-    static let chromeUA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
+    static let safariUA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 15_7_5) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.0 Safari/605.1.15"
+    static let chromeUA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36"
 
     func userAgentString(custom: String = "") -> String {
         switch self {
@@ -79,8 +79,8 @@ enum UserAgentOption: String, CaseIterable {
 
     func settingsDescription(custom: String = "") -> String {
         switch self {
-        case .safari: return "Identifies as Safari 17.0 on macOS"
-        case .chrome: return "Identifies as Chrome 131 on macOS"
+        case .safari: return "Identifies as Safari 26.0 on macOS"
+        case .chrome: return "Identifies as Chrome 134 on macOS"
         case .custom: return custom.isEmpty ? "No custom user agent set — falls back to Safari" : "Using custom user agent string"
         }
     }
